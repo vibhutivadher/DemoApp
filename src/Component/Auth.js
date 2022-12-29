@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 
 export default function (props) {
-    
+
     let [authMode, setAuthMode] = useState("signin")
 
     const [errors, setErrors] = useState({});
@@ -14,15 +14,29 @@ export default function (props) {
     const handleSubmit = (event) => {
         event.preventDefault();
         if (validate()) {
-            console.log("Sucess",formData)
+            if (authMode == "signup") {
+                localStorage.setItem(formData.username, JSON.stringify(formData));
+                setAuthMode('signin')
+            } else {
+                const user = localStorage.getItem(formData.username);
+                const userObj = JSON.parse(user);
+                console.log(userObj)
+                if (userObj?.username === formData.username && userObj?.password === formData.password) {
+                    window.location.href = "/dashboard"
+                    localStorage.setItem("isLoggedIn",true);
+                } else {
+                    setAuthMode('signup')
+                }
+
+            }
         }
     }
+
 
     const validate = () => {
         let input = formData;
         let errorsVal = {};
         let isValid = true;
-        console.log("***",input)
         if (!input["username"]) {
             isValid = false;
             errorsVal["username"] = "Please enter user name.";
@@ -65,7 +79,6 @@ export default function (props) {
             }
 
         }
-        console.log(errorsVal)
         setErrors(errorsVal);
 
         return isValid;
